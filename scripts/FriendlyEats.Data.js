@@ -16,21 +16,31 @@
 'use strict';
 
 FriendlyEats.prototype.addRestaurant = function(data) {
-  /*
-    TODO: Implement adding a document
-  */
+  var collection = firebase.firestore().collection('restaurants');
+  return collection.add(data);
 };
 
 FriendlyEats.prototype.getAllRestaurants = function(renderer) {
-  /*
-    TODO: Retrieve list of restaurants
-  */
+  var query = firebase.firestore()
+      .collection('restaurants')
+      .orderBy('avgRating', 'desc')
+      .limit(50);
+
+  this.getDocumentsInQuery(query, renderer);
 };
 
 FriendlyEats.prototype.getDocumentsInQuery = function(query, renderer) {
-  /*
-    TODO: Render all documents in the provided query
-  */
+  query.onSnapshot(function(snapshot) {
+    if (!snapshot.size) return renderer.empty(); // Display "There are no restaurants".
+
+    snapshot.docChanges().forEach(function(change) {
+      if (change.type === 'removed') {
+        renderer.remove(change.doc);
+      } else {
+        renderer.display(change.doc);
+      }
+    });
+  });
 };
 
 FriendlyEats.prototype.getRestaurant = function(id) {
